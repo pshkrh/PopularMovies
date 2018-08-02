@@ -17,3 +17,7 @@ Method to iterate through and obtain data from the JSON response based on these 
 
 https://stackoverflow.com/questions/36812881/how-to-get-value-by-key-from-json
 https://stackoverflow.com/questions/9151619/how-to-iterate-over-a-jsonobject
+
+
+Method to check internet connectivity before HTTP Request from the Android Documentation
+https://developer.android.com/training/monitoring-device-state/connectivity-monitoring
