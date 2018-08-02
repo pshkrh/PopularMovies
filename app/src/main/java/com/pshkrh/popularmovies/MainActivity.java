@@ -1,5 +1,8 @@
 package com.pshkrh.popularmovies;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -67,47 +71,66 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void networkingTime(String url){
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(url, new JsonHttpResponseHandler() {
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                ProgressBar progressBar = findViewById(R.id.progress_bar);
-                RecyclerView recyclerView = findViewById(R.id.recycler);
-                recyclerView.setVisibility(View.GONE);
+        ConnectivityManager cm =
+                (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                try{
-                    JSONArray resultsLength = response.getJSONArray("results");
-                    for(int i=0;i<resultsLength.length();i++){
-                        JSONObject moviejson = response.getJSONArray("results").getJSONObject(i);
-                        String title = moviejson.getString("title");
-                        String overview = moviejson.getString("overview");
-                        String rating = Double.toString(moviejson.getDouble("vote_average"));
-                        String releaseDate = moviejson.getString("release_date");
-                        String posterPath = moviejson.getString("poster_path");
-                        Movie movie = new Movie(title,overview,rating,releaseDate,posterPath);
-                        mMovies.add(movie);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        final ProgressBar progressBar = findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        if(isConnected){
+
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.get(url, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    RecyclerView recyclerView = findViewById(R.id.recycler);
+                    recyclerView.setVisibility(View.GONE);
+
+                    try{
+                        JSONArray resultsLength = response.getJSONArray("results");
+                        for(int i=0;i<resultsLength.length();i++){
+                            JSONObject moviejson = response.getJSONArray("results").getJSONObject(i);
+                            String title = moviejson.getString("title");
+                            String overview = moviejson.getString("overview");
+                            String rating = Double.toString(moviejson.getDouble("vote_average"));
+                            String releaseDate = moviejson.getString("release_date");
+                            String posterPath = moviejson.getString("poster_path");
+                            Movie movie = new Movie(title,overview,rating,releaseDate,posterPath);
+                            mMovies.add(movie);
+                        }
+                        MovieAdapter movieAdapter = new MovieAdapter(mMovies);
+                        recyclerView.setAdapter(movieAdapter);
+                        movieAdapter.notifyDataSetChanged();
+                        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
+                        progressBar.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.VISIBLE);
+
                     }
-                    MovieAdapter movieAdapter = new MovieAdapter(mMovies);
-                    recyclerView.setAdapter(movieAdapter);
-                    movieAdapter.notifyDataSetChanged();
-                    recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
-                    progressBar.setVisibility(View.INVISIBLE);
-                    recyclerView.setVisibility(View.VISIBLE);
-
+                    catch(JSONException je){
+                        je.printStackTrace();
+                    }
                 }
-                catch(JSONException je){
-                    je.printStackTrace();
-                }
-            }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-                Log.d(TAG, "Request fail! Status code: " + statusCode);
-                Log.d(TAG, "Fail response: " + response);
-                Log.e(TAG, e.toString());
-            }
-        });
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+                    Log.d(TAG, "Request fail! Status code: " + statusCode);
+                    Log.d(TAG, "Fail response: " + response);
+                    Log.e(TAG, e.toString());
+                }
+            });
+
+        }
+        else{
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Internet Connection Required!", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
