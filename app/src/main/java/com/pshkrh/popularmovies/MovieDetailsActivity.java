@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.loopj.android.http.AsyncHttpClient;
@@ -119,6 +120,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     Log.e(TAG, e.toString());
                 }
             });
+        }
+        else{
+            Toast.makeText(this, "Internet Connection Required!", Toast.LENGTH_SHORT).show();
         }
     }
 
