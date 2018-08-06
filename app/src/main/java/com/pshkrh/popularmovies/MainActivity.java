@@ -101,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
                             String rating = Double.toString(moviejson.getDouble("vote_average"));
                             String releaseDate = moviejson.getString("release_date");
                             String posterPath = moviejson.getString("poster_path");
-                            Movie movie = new Movie(title,overview,rating,releaseDate,posterPath);
+                            int movieID = moviejson.getInt("id");
+                            Log.d(TAG,"Movie ID = " + String.valueOf(movieID));
+                            Movie movie = new Movie(title,overview,rating,releaseDate,posterPath,String.valueOf(movieID));
                             mMovies.add(movie);
                         }
                         MovieAdapter movieAdapter = new MovieAdapter(mMovies);

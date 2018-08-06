@@ -6,4 +6,6 @@
     <string name="rating">Average Rating</string>
     <string name="release_date">Release Date</string>
     <string name="loading">Loading&#8230;</string>
+    <string name="favourite">Favourites</string>
+    <string name="reviews">Reviews</string>
 </resources>

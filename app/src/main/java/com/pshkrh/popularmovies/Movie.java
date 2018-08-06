@@ -11,13 +11,15 @@ public class Movie implements Parcelable {
     private String mRating;
     private String mDate;
     private String mPosterPath;
+    private String mMovieID;
 
-    public Movie(String title, String overview, String rating, String releaseDate, String posterPath) {
+    public Movie(String title, String overview, String rating, String releaseDate, String posterPath, String movieID) {
         mTitle = title;
         mOverview = overview;
         mRating = rating;
         mDate = releaseDate;
         mPosterPath = posterPath;
+        mMovieID = movieID;
     }
 
     public Movie(Parcel p) {
@@ -26,13 +28,12 @@ public class Movie implements Parcelable {
         mRating = p.readString();
         mDate = p.readString();
         mPosterPath = p.readString();
+        mMovieID = p.readString();
     }
 
     private Movie(String title, boolean x){
         mTitle = title;
     }
-
-    private static int movieID = 0;
 
     public String getTitle() {
         return mTitle;
@@ -54,6 +55,10 @@ public class Movie implements Parcelable {
         return mPosterPath;
     }
 
+    public String getMovieID() {
+        return mMovieID;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -66,6 +71,7 @@ public class Movie implements Parcelable {
         dest.writeString(mRating);
         dest.writeString(mDate);
         dest.writeString(mPosterPath);
+        dest.writeString(mMovieID);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>(){
