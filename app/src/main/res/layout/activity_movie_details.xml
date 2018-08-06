@@ -99,23 +99,31 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <android.support.v7.widget.RecyclerView
+
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"/>
+                    android:layout_height="wrap_content"
+                    android:text="@string/trailers"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_trailer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/reviews"
-                    android:textStyle="bold"
-                    android:textSize="20sp"/>
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/movie_review"
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_review"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"/>
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 

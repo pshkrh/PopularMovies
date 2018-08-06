@@ -1,11 +1,15 @@
 package com.pshkrh.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -23,12 +27,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import cz.msebera.android.httpclient.Header;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
     private final static String TAG = "MovieDetailsActivity";
     Movie movie;
+    ArrayList<Trailer> mTrailers = new ArrayList<>();
+    ArrayList<Review> mReviews = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,20 +64,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         Glide.with(this).load(posterUrl).into(moviePoster);
         overview.setText(movie.getOverview());
 
-        //TODO: Load the Trailers List for the Movie
-
+        //Load Trailer List for the Movie
+        loadTrailersList(movieID);
 
         // Load Reviews for the Movie
         loadReviews(movieID);
 
-
-
     }
 
     public void loadReviews(String movieID){
-        final TextView reviews = findViewById(R.id.movie_review);
+        //final TextView reviews = findViewById(R.id.movie_review);
         String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=311ad508ef82a420d7cac8fa23b6e532";
-        reviews.setText(reviewUrl);
 
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -83,29 +88,74 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    //RecyclerView recyclerView = findViewById(R.id.recycler);
-                    //recyclerView.setVisibility(View.GONE);
-                    StringBuilder review= new StringBuilder("");
+                    RecyclerView recyclerView = findViewById(R.id.recycler_review);
                     try{
                         JSONArray resultsLength = response.getJSONArray("results");
                         for(int i=0;i<resultsLength.length();i++){
-                            JSONObject moviejson = response.getJSONArray("results").getJSONObject(i);
-                            String author = moviejson.getString("author");
-                            String content = moviejson.getString("content");
-                            review.append(author);
-                            review.append("\n");
-                            review.append(content);
-                            review.append("\n\n");
+                            JSONObject reviewjson = response.getJSONArray("results").getJSONObject(i);
+                            String author = reviewjson.getString("author");
+                            String content = reviewjson.getString("content");
+                            String id = reviewjson.getString("id");
+                            String url = reviewjson.getString("url");
+                            Review review = new Review(author,content,id,url);
+                            mReviews.add(review);
                         }
-                        /*
-                        MovieAdapter movieAdapter = new MovieAdapter(mMovies);
-                        recyclerView.setAdapter(movieAdapter);
-                        movieAdapter.notifyDataSetChanged();
-                        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
-                        progressBar.setVisibility(View.INVISIBLE);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        */
-                        reviews.setText(review);
+                        ReviewAdapter reviewAdapter = new ReviewAdapter(mReviews);
+                        recyclerView.setAdapter(reviewAdapter);
+                        reviewAdapter.notifyDataSetChanged();
+                        recyclerView.setLayoutManager(new LinearLayoutManager(MovieDetailsActivity.this));
+
+                    }
+                    catch(JSONException je){
+                        je.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+                    Log.d(TAG, "Request fail! Status code: " + statusCode);
+                    Log.d(TAG, "Fail response: " + response);
+                    Log.e(TAG, e.toString());
+                }
+            });
+        }
+        else{
+            Toast.makeText(this, "Internet Connection Required!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void loadTrailersList(String movieID){
+        String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=311ad508ef82a420d7cac8fa23b6e532";
+
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if(isConnected){
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.get(reviewUrl, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    RecyclerView trailerRecyclerView = findViewById(R.id.recycler_trailer);
+                    try{
+                        JSONArray resultsLength = response.getJSONArray("results");
+                        for(int i=0;i<resultsLength.length();i++){
+                            JSONObject trailerjson = response.getJSONArray("results").getJSONObject(i);
+                            String videoType = trailerjson.getString("type");
+                            if(videoType.equals("Trailer")) {
+                                String key = trailerjson.getString("key");
+                                String name = trailerjson.getString("name");
+                                Trailer trailer = new Trailer(key,name);
+                                mTrailers.add(trailer);
+                            }
+                        }
+                        TrailerAdapter trailerAdapter = new TrailerAdapter(mTrailers);
+                        trailerRecyclerView.setAdapter(trailerAdapter);
+                        trailerAdapter.notifyDataSetChanged();
+                        trailerRecyclerView.setLayoutManager(new LinearLayoutManager(MovieDetailsActivity.this));
 
                     }
                     catch(JSONException je){
