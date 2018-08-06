@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -37,6 +39,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     Movie movie;
     ArrayList<Trailer> mTrailers = new ArrayList<>();
     ArrayList<Review> mReviews = new ArrayList<>();
+
+    private int starred;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +78,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     public void loadReviews(String movieID){
         //final TextView reviews = findViewById(R.id.movie_review);
-        String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=311ad508ef82a420d7cac8fa23b6e532";
+        String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=" + BuildConfig.API_KEY;
 
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -125,7 +129,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     public void loadTrailersList(String movieID){
-        String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=311ad508ef82a420d7cac8fa23b6e532";
+        String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=" + BuildConfig.API_KEY;
 
         ConnectivityManager cm =
                 (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -187,13 +191,28 @@ public class MovieDetailsActivity extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            case R.id.star:
+                if(starred==0) {
+                    starred = 1;
+                    item.setIcon(R.drawable.star);
+                    break;
+                }
+                else {
+                    starred = 0;
+                    item.setIcon(R.drawable.star_outline);
+                    break;
+                }
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.details_menu, menu);
+        if(starred==1){
+            menu.findItem(R.id.star).setIcon(R.drawable.star);
+        }
         return true;
     }
 }

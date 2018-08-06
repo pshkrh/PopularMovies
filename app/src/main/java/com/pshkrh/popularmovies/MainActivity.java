@@ -3,6 +3,7 @@ package com.pshkrh.popularmovies;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -34,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Movie> mMovies = new ArrayList<>();
     private int noOfColumns = 2;
 
-    private final static String MOVIE_POPULAR_BASE_URL = "http://api.themoviedb.org/3/movie/popular?api_key=311ad508ef82a420d7cac8fa23b6e532";
-    private final static String MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?api_key=311ad508ef82a420d7cac8fa23b6e532";
+    private final static String MOVIE_POPULAR_BASE_URL = "http://api.themoviedb.org/3/movie/popular?api_key=" + BuildConfig.API_KEY;
+    private final static String MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + BuildConfig.API_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
