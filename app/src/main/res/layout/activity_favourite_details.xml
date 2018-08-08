@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MovieDetailsActivity">
+    tools:context=".FavouriteDetailsActivity">
 
     <ScrollView
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/movie_title"
+                        android:id="@+id/favourite_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
@@ -49,7 +49,7 @@
                         android:padding="10dp">
 
                         <ImageView
-                            android:id="@+id/movie_poster_2"
+                            android:id="@+id/favourite_poster_2"
                             android:layout_width="185dp"
                             android:layout_height="185dp"
                             android:padding="5dp" />
@@ -68,7 +68,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/movie_rating"
+                                android:id="@+id/favourite_rating"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textSize="18sp" />
@@ -82,7 +82,7 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/release_date"
+                                android:id="@+id/favourite_release_date"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textSize="18sp" />
@@ -124,7 +124,7 @@
                         android:background="@android:color/darker_gray" />
 
                     <TextView
-                        android:id="@+id/movie_overview"
+                        android:id="@+id/favourite_overview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
@@ -159,7 +159,7 @@
 
 
                     <android.support.v7.widget.RecyclerView
-                        android:id="@+id/recycler_trailer"
+                        android:id="@+id/favourite_recycler_trailer"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
 
@@ -190,7 +190,7 @@
                         android:background="@android:color/darker_gray" />
 
                     <android.support.v7.widget.RecyclerView
-                        android:id="@+id/recycler_review"
+                        android:id="@+id/favourite_recycler_review"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
