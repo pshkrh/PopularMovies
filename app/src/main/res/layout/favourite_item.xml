@@ -10,16 +10,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/movie_poster"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/favourite_poster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/movie_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"/>
+        <TextView
+            android:id="@+id/favourite_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"/>
 
 
         <View
@@ -30,7 +30,7 @@
 
 
         <TextView
-            android:id="@+id/movie_rating"
+            android:id="@+id/favourite_rating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
