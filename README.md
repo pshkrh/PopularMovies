@@ -1,7 +1,7 @@
 # PopularMovies
 Android Application for the Udacity Android Developer Nanodegree
 
-Attribution Details:
+# Stage 1 Attribution Details:
 
 The app uses TheMovieDB API for the Movie details.
 
@@ -21,3 +21,9 @@ https://stackoverflow.com/questions/9151619/how-to-iterate-over-a-jsonobject
 
 Method to check internet connectivity before HTTP Request from the Android Documentation
 https://developer.android.com/training/monitoring-device-state/connectivity-monitoring
+
+# Stage 2 Attribution Details:
+
+Icons used in the action bar from https://materialdesignicons.com/
+
+Method to preserve position (using onSaveInstanceState) in the RecyclerView list from https://stackoverflow.com/questions/28236390/recyclerview-store-restore-state-between-activities
