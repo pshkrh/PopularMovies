@@ -2,6 +2,7 @@ package com.pshkrh.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Movie;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,13 +23,23 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public ImageView moviePoster;
+        private ImageView moviePoster;
+        private TextView movieName;
+        private TextView movieRating;
+        private Cursor mCursor;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             moviePoster = itemView.findViewById(R.id.movie_poster);
+            movieName = itemView.findViewById(R.id.movie_name);
+            movieRating = itemView.findViewById(R.id.movie_rating);
             itemView.setOnClickListener(this);
+        }
+
+        public ViewHolder(View itemView, Cursor cursor) {
+            super(itemView);
+            mCursor = cursor;
         }
 
         @Override
@@ -61,8 +72,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         ImageView moviePoster = viewHolder.moviePoster;
         String posterUrl = "http://image.tmdb.org/t/p/w185/" + movie.getPosterPath();
-        Log.d("MovieAdapter","Poster URL = " + posterUrl);
         Glide.with(viewHolder.moviePoster.getContext()).load(posterUrl).into(moviePoster);
+
+        TextView movieName = viewHolder.movieName;
+        TextView movieRating = viewHolder.movieRating;
+
+        movieName.setText(movie.getTitle());
+        movieRating.setText(movie.getRating());
     }
 
     @Override
