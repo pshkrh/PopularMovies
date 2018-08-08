@@ -1,9 +1,14 @@
 package com.pshkrh.popularmovies;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -33,10 +38,20 @@ public class MainActivity extends AppCompatActivity {
     public static String TAG = "MainActivity";
 
     ArrayList<Movie> mMovies = new ArrayList<>();
+    ArrayList<Favourite> mFavourites = new ArrayList<>();
     private int noOfColumns = 2;
 
     private final static String MOVIE_POPULAR_BASE_URL = "http://api.themoviedb.org/3/movie/popular?api_key=" + BuildConfig.API_KEY;
     private final static String MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + BuildConfig.API_KEY;
+
+    private final static String LIFECYCLE_CALLBACKS_TEXT_KEY = "callbacks";
+
+    private Parcelable mListState;
+
+    private SQLiteDatabase mDb;
+    DBHelper dbHelper = new DBHelper(this);
+
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
         ProgressBar progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
         networkingTime(MOVIE_POPULAR_BASE_URL);
+
+        mDb = dbHelper.getWritableDatabase();
+
+        recyclerView = findViewById(R.id.recycler);
+        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
     }
 
     @Override
@@ -65,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sort_top_rated:
                 mMovies.clear();
                 networkingTime(MOVIE_TOP_RATED_BASE_URL);
+                return true;
+            case R.id.sort_favourite:
+                mMovies.clear();
+                mFavourites.clear();
+                getFavouriteMovies();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -90,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    RecyclerView recyclerView = findViewById(R.id.recycler);
                     recyclerView.setVisibility(View.GONE);
 
                     try{
@@ -110,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
                         MovieAdapter movieAdapter = new MovieAdapter(mMovies);
                         recyclerView.setAdapter(movieAdapter);
                         movieAdapter.notifyDataSetChanged();
-                        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
                         progressBar.setVisibility(View.INVISIBLE);
                         recyclerView.setVisibility(View.VISIBLE);
 
@@ -136,5 +159,52 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void getFavouriteMovies(){
+        String query = "SELECT * FROM " + DBContract.DBEntry.TABLE_NAME;
+        Log.d(TAG,query);
+        Cursor mCursor = mDb.rawQuery(query,null);
+        mCursor.moveToFirst();
+        do{
+            String name = mCursor.getString(1);
+            String rating = mCursor.getString(2);
+            String overview = mCursor.getString(3);
+            String date = mCursor.getString(4);
+            byte[] byteArray = mCursor.getBlob(5);
+            Bitmap bm = BitmapFactory.decodeByteArray(byteArray, 0 ,byteArray.length);
+            String id = mCursor.getString(6);
 
+            String check = name + "///" + rating + "///" + id;
+            Log.d(TAG,check);
+            Favourite favourite = new Favourite(name,overview,rating,date,id,bm);
+            mFavourites.add(favourite);
+        } while(mCursor.moveToNext());
+        mCursor.close();
+        RecyclerView recyclerView = findViewById(R.id.recycler);
+        FavouritesAdapter favouritesAdapter = new FavouritesAdapter(mFavourites);
+        recyclerView.setAdapter(favouritesAdapter);
+        favouritesAdapter.notifyDataSetChanged();
+        recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mListState = recyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(LIFECYCLE_CALLBACKS_TEXT_KEY,mListState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState!=null)
+            mListState = savedInstanceState.getParcelable(LIFECYCLE_CALLBACKS_TEXT_KEY);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mListState!=null){
+            recyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+        }
+    }
 }
