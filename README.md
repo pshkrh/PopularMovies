@@ -27,3 +27,6 @@ https://developer.android.com/training/monitoring-device-state/connectivity-moni
 Icons used in the action bar from https://materialdesignicons.com/
 
 Method to preserve position (using onSaveInstanceState) in the RecyclerView list from https://stackoverflow.com/questions/28236390/recyclerview-store-restore-state-between-activities
+
+Method to convert Bitmaps to Byte Array from https://stackoverflow.com/questions/28183558/how-to-save-bitmap-from-imageview-to-database-sqlite
+
