@@ -1,5 +1,6 @@
 package com.pshkrh.popularmovies;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,6 +13,7 @@ public class Movie implements Parcelable {
     private String mDate;
     private String mPosterPath;
     private String mMovieID;
+    private Bitmap mBitmap;
 
     public Movie(String title, String overview, String rating, String releaseDate, String posterPath, String movieID) {
         mTitle = title;
@@ -20,6 +22,14 @@ public class Movie implements Parcelable {
         mDate = releaseDate;
         mPosterPath = posterPath;
         mMovieID = movieID;
+    }
+
+    public Movie(String title, String overview, String rating, String date, Bitmap bitmap) {
+        mTitle = title;
+        mOverview = overview;
+        mRating = rating;
+        mDate = date;
+        mBitmap = bitmap;
     }
 
     public Movie(Parcel p) {
@@ -57,6 +67,10 @@ public class Movie implements Parcelable {
 
     public String getMovieID() {
         return mMovieID;
+    }
+
+    public Bitmap getBitmap() {
+        return mBitmap;
     }
 
     @Override
