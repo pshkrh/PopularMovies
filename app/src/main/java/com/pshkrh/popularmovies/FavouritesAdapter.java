@@ -35,9 +35,9 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
         public ViewHolder(View itemView) {
             super(itemView);
 
-            moviePoster = itemView.findViewById(R.id.favourite_poster);
-            movieName = itemView.findViewById(R.id.favourite_name);
-            movieRating = itemView.findViewById(R.id.favourite_rating);
+            moviePoster = itemView.findViewById(R.id.movie_poster);
+            movieName = itemView.findViewById(R.id.movie_name);
+            movieRating = itemView.findViewById(R.id.movie_rating);
             itemView.setOnClickListener(this);
         }
 
@@ -47,6 +47,7 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
             Favourite passDetails = mFavourites.get(position);
             Intent intent = new Intent(view.getContext(),FavouriteDetailsActivity.class);
             intent.putExtra("Parcel",passDetails);
+            intent.putExtra("Flag","fav");
 
             Bitmap bm = passDetails.getBitmap();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -67,7 +68,7 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
     public FavouritesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        View contactView = inflater.inflate(R.layout.favourite_item, parent, false);
+        View contactView = inflater.inflate(R.layout.recycler_item, parent, false);
         ViewHolder viewHolder = new ViewHolder(contactView);
         return viewHolder;
     }
