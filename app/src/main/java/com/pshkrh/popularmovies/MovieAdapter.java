@@ -21,6 +21,7 @@ import com.bumptech.glide.request.RequestOptions;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
@@ -41,11 +42,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             itemView.setOnClickListener(this);
         }
 
-        public ViewHolder(View itemView, Cursor cursor) {
-            super(itemView);
-            mCursor = cursor;
-        }
-
         @Override
         public void onClick(View view) {
             int position = getAdapterPosition();
@@ -57,8 +53,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         }
     }
 
-    private List<com.pshkrh.popularmovies.Movie> mMovies;
-    public MovieAdapter(List<com.pshkrh.popularmovies.Movie> movies) {
+    private ArrayList<com.pshkrh.popularmovies.Movie> mMovies;
+    public MovieAdapter(ArrayList<com.pshkrh.popularmovies.Movie> movies) {
         mMovies = movies;
     }
 
@@ -67,8 +63,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         View contactView = inflater.inflate(R.layout.recycler_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(contactView);
-        return viewHolder;
+        return new ViewHolder(contactView);
     }
 
     @Override
@@ -90,7 +85,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return mMovies.size();
+        if(mMovies == null)
+            return 0;
+        else
+            return mMovies.size();
     }
 
 }

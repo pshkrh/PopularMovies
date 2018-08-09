@@ -3,7 +3,7 @@
     package="com.pshkrh.popularmovies">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -19,8 +19,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MovieDetailsActivity"></activity>
-        <activity android:name=".FavouriteDetailsActivity"></activity>
+        <activity android:name=".MovieDetailsActivity" />
+        <activity android:name=".FavouriteDetailsActivity" />
+        <activity android:name=".FavouritesActivity"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

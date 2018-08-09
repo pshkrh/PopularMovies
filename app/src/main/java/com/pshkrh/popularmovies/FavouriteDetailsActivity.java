@@ -196,7 +196,7 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(FavouriteDetailsActivity.this, MainActivity.class);
+        Intent intent = new Intent(FavouriteDetailsActivity.this, FavouritesActivity.class);
         intent.putExtra("Flag","fav");
         startActivity(intent);
         finish();
@@ -206,7 +206,7 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent intent = new Intent(FavouriteDetailsActivity.this, MainActivity.class);
+                Intent intent = new Intent(FavouriteDetailsActivity.this, FavouritesActivity.class);
                 intent.putExtra("Flag","fav");
                 startActivity(intent);
                 finish();

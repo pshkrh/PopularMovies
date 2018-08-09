@@ -1,5 +1,6 @@
 package com.pshkrh.popularmovies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -26,6 +27,8 @@ import java.util.List;
 
 public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.ViewHolder> {
 
+    private Context mContext;
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ImageView moviePoster;
@@ -47,7 +50,6 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
             Favourite passDetails = mFavourites.get(position);
             Intent intent = new Intent(view.getContext(),FavouriteDetailsActivity.class);
             intent.putExtra("Parcel",passDetails);
-            intent.putExtra("Flag","fav");
 
             Bitmap bm = passDetails.getBitmap();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -56,12 +58,14 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
             intent.putExtra("byteArray",bos.toByteArray());
 
             view.getContext().startActivity(intent);
+            ((FavouritesActivity)mContext).finish();
         }
     }
 
     private List<Favourite> mFavourites;
-    public FavouritesAdapter(List<Favourite> favourites) {
+    public FavouritesAdapter(List<Favourite> favourites, Context context) {
         mFavourites = favourites;
+        mContext = context;
     }
 
     @Override
@@ -69,8 +73,7 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         View contactView = inflater.inflate(R.layout.recycler_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(contactView);
-        return viewHolder;
+        return new ViewHolder(contactView);
     }
 
     @Override
@@ -89,7 +92,10 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return mFavourites.size();
+        if(mFavourites == null)
+            return 0;
+        else
+            return mFavourites.size();
     }
 
 }
