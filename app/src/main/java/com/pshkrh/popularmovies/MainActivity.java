@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Parcelable mRecyclerState;
 
+    private ProgressBar progressBar;
+
     private SQLiteDatabase mDb;
     public DBHelper dbHelper = new DBHelper(this);
 
@@ -61,11 +63,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ProgressBar progressBar = findViewById(R.id.progress_bar);
+        progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
 
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
+
+        mDb = dbHelper.getWritableDatabase();
 
         mMovies.clear();
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY)){
@@ -77,10 +81,16 @@ public class MainActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.VISIBLE);
         }
         else{
-            networkingTime(MOVIE_POPULAR_BASE_URL);
+            String flag = getIntent().getStringExtra("Flag");
+            if(flag!=null && flag.equals("fav")){
+                mMovies.clear();
+                mFavourites.clear();
+                getFavouriteMovies();
+            }
+            else{
+                networkingTime(MOVIE_POPULAR_BASE_URL);
+            }
         }
-
-        mDb = dbHelper.getWritableDatabase();
 
     }
 
@@ -98,16 +108,19 @@ public class MainActivity extends AppCompatActivity {
                 mMovies.clear();
                 SORT_FLAG = "mostPopular";
                 networkingTime(MOVIE_POPULAR_BASE_URL);
+                setTitle(R.string.most_popular_movies);
                 return true;
             case R.id.sort_top_rated:
                 mMovies.clear();
                 SORT_FLAG = "topRated";
                 networkingTime(MOVIE_TOP_RATED_BASE_URL);
+                setTitle(R.string.top_rated_movies);
                 return true;
             case R.id.sort_favourite:
                 mMovies.clear();
                 mFavourites.clear();
                 getFavouriteMovies();
+                setTitle(R.string.favourite_movies);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -201,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(favouritesAdapter);
         favouritesAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override
