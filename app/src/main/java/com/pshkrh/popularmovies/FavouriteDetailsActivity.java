@@ -2,6 +2,8 @@ package com.pshkrh.popularmovies;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -35,12 +37,14 @@ import cz.msebera.android.httpclient.Header;
 
 public class FavouriteDetailsActivity extends AppCompatActivity {
     private final static String TAG = "FaveDetailsActivity";
-    Favourite mFavourite;
+    public Favourite mFavourite;
     private SQLiteDatabase mDb;
     public ImageView favouritePoster;
 
-    ArrayList<Trailer> mTrailers = new ArrayList<>();
-    ArrayList<Review> mReviews = new ArrayList<>();
+    public ArrayList<Trailer> mTrailers = new ArrayList<>();
+    public ArrayList<Review> mReviews = new ArrayList<>();
+
+    private int starred=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +196,98 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        Intent intent = new Intent(FavouriteDetailsActivity.this, MainActivity.class);
+        intent.putExtra("Flag","fav");
+        startActivity(intent);
+        finish();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(FavouriteDetailsActivity.this, MainActivity.class);
+                intent.putExtra("Flag","fav");
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.star:
+                if(starred==0) {
+                    starred = 1;
+                    item.setIcon(R.drawable.star);
+                    boolean res = setFavourite(mFavourite);
+                    if(res)
+                        Toast.makeText(this, "Set Favourite Movie Successfully!", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                else {
+                    starred = 0;
+                    item.setIcon(R.drawable.star_outline);
+                    removeFavourite(mFavourite);
+                    Toast.makeText(this, "Unfavourited Movie Successfully!", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.details_menu, menu);
+        if(starred==1){
+            menu.findItem(R.id.star).setIcon(R.drawable.star);
+        }
+        else{
+            menu.findItem(R.id.star).setIcon(R.drawable.star_outline);
+        }
+        return true;
+    }
+
+    public boolean setFavourite(Favourite favourite){
+        ContentValues cv = new ContentValues();
+
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_NAME,favourite.getTitle());
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_RATING,favourite.getRating());
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_OVERVIEW,favourite.getOverview());
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_DATE,favourite.getDate());
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_ID,favourite.getMovieID());
+
+        Bitmap bitmap = ((BitmapDrawable)favouritePoster.getDrawable()).getBitmap();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap .compress(Bitmap.CompressFormat.PNG, 100, bos);
+        byte[] poster = bos.toByteArray();
+
+        cv.put(DBContract.DBEntry.COLUMN_MOVIE_POSTER,poster);
+
+        Log.d(TAG,cv.toString());
+
+        long result = mDb.insert(DBContract.DBEntry.TABLE_NAME, null,cv);
+
+        if(result == -1){
+            return false;
+        }
+        else return true;
+    }
+
+    public void removeFavourite(Favourite favourite){
+        //long res = mDb.delete(DBContract.DBEntry.TABLE_NAME, DBContract.DBEntry.COLUMN_MOVIE_ID +  "=" + movie.getMovieID(),null);
+        String query = "DELETE FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " + DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + favourite.getMovieID();
+        mDb.execSQL(query);
+    }
+
+    public boolean checkFavourite(Favourite favourite){
+        String query = "SELECT " + DBContract.DBEntry.COLUMN_MOVIE_ID + " FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " +
+                DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + favourite.getMovieID();
+        Log.d(TAG,query);
+        Cursor mCursor = mDb.rawQuery(query,null);
+        if(mCursor.getCount() == 1){
+            mCursor.close();
+            return true;
+        }
+        else{
+            mCursor.close();
+            return false;
+        }
+    }
 }
