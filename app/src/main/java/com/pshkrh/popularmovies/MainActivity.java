@@ -37,19 +37,22 @@ public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
 
-    ArrayList<Movie> mMovies = new ArrayList<>();
-    ArrayList<Favourite> mFavourites = new ArrayList<>();
+    public ArrayList<Movie> mMovies = new ArrayList<>();
+    public ArrayList<Favourite> mFavourites = new ArrayList<>();
     private int noOfColumns = 2;
 
     private final static String MOVIE_POPULAR_BASE_URL = "http://api.themoviedb.org/3/movie/popular?api_key=" + BuildConfig.API_KEY;
     private final static String MOVIE_TOP_RATED_BASE_URL = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + BuildConfig.API_KEY;
 
-    private final static String LIFECYCLE_CALLBACKS_TEXT_KEY = "callbacks";
+    private final static String RECYCLER_STATE_KEY = "state";
+    private final static String MOVIES_KEY = "moviesKey";
 
-    private Parcelable mListState;
+    private String SORT_FLAG = "mostPopular";
+
+    private Parcelable mRecyclerState;
 
     private SQLiteDatabase mDb;
-    DBHelper dbHelper = new DBHelper(this);
+    public DBHelper dbHelper = new DBHelper(this);
 
     private RecyclerView recyclerView;
 
@@ -60,12 +63,25 @@ public class MainActivity extends AppCompatActivity {
 
         ProgressBar progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
-        networkingTime(MOVIE_POPULAR_BASE_URL);
-
-        mDb = dbHelper.getWritableDatabase();
 
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this,noOfColumns));
+
+        mMovies.clear();
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY)){
+            mMovies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
+            MovieAdapter movieAdapter = new MovieAdapter(mMovies);
+            recyclerView.setAdapter(movieAdapter);
+            movieAdapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+        else{
+            networkingTime(MOVIE_POPULAR_BASE_URL);
+        }
+
+        mDb = dbHelper.getWritableDatabase();
+
     }
 
     @Override
@@ -80,10 +96,12 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sort_most_popular:
                 mMovies.clear();
+                SORT_FLAG = "mostPopular";
                 networkingTime(MOVIE_POPULAR_BASE_URL);
                 return true;
             case R.id.sort_top_rated:
                 mMovies.clear();
+                SORT_FLAG = "topRated";
                 networkingTime(MOVIE_TOP_RATED_BASE_URL);
                 return true;
             case R.id.sort_favourite:
@@ -116,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     recyclerView.setVisibility(View.GONE);
-
+                    mMovies.clear();
                     try{
                         JSONArray resultsLength = response.getJSONArray("results");
                         for(int i=0;i<resultsLength.length();i++){
@@ -136,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                         movieAdapter.notifyDataSetChanged();
                         progressBar.setVisibility(View.INVISIBLE);
                         recyclerView.setVisibility(View.VISIBLE);
-
                     }
                     catch(JSONException je){
                         je.printStackTrace();
@@ -189,22 +206,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mListState = recyclerView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(LIFECYCLE_CALLBACKS_TEXT_KEY,mListState);
+
+        mRecyclerState = recyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(RECYCLER_STATE_KEY,mRecyclerState);
+        outState.putParcelableArrayList(MOVIES_KEY,mMovies);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState!=null)
-            mListState = savedInstanceState.getParcelable(LIFECYCLE_CALLBACKS_TEXT_KEY);
+
+        mRecyclerState = savedInstanceState.getParcelable(RECYCLER_STATE_KEY);
+        mMovies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(mListState!=null){
-            recyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+
+        if(mRecyclerState!=null){
+            recyclerView.getLayoutManager().onRestoreInstanceState(mRecyclerState);
         }
     }
 }

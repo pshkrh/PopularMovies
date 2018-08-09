@@ -3,7 +3,9 @@ package com.pshkrh.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Movie;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.request.RequestOptions;
 
 import org.w3c.dom.Text;
 
@@ -72,7 +76,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         ImageView moviePoster = viewHolder.moviePoster;
         String posterUrl = "http://image.tmdb.org/t/p/w185/" + movie.getPosterPath();
-        Glide.with(viewHolder.moviePoster.getContext()).load(posterUrl).into(moviePoster);
+        Glide.with(viewHolder.moviePoster.getContext())
+                .load(posterUrl)
+                .into(moviePoster);
 
         TextView movieName = viewHolder.movieName;
         TextView movieRating = viewHolder.movieRating;
