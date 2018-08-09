@@ -52,6 +52,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             com.pshkrh.popularmovies.Movie passDetails = mMovies.get(position);
             Intent intent = new Intent(view.getContext(),MovieDetailsActivity.class);
             intent.putExtra("Parcel",passDetails);
+            intent.putExtra("Flag","mov");
             view.getContext().startActivity(intent);
         }
     }
