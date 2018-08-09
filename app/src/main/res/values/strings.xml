@@ -10,4 +10,6 @@
     <string name="reviews">Reviews</string>
     <string name="trailers">Trailers</string>
     <string name="star">Star</string>
+    <string name="dummy_name">Amazing Movie</string>
+    <string name="dummy_rating">100</string>
 </resources>
