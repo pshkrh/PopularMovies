@@ -43,9 +43,9 @@ import cz.msebera.android.httpclient.Header;
 public class MovieDetailsActivity extends AppCompatActivity {
 
     private final static String TAG = "MovieDetailsActivity";
-    Movie movie;
-    ArrayList<Trailer> mTrailers = new ArrayList<>();
-    ArrayList<Review> mReviews = new ArrayList<>();
+    public Movie movie;
+    public ArrayList<Trailer> mTrailers = new ArrayList<>();
+    public ArrayList<Review> mReviews = new ArrayList<>();
 
     private int starred=0;
     private SQLiteDatabase mDb;
