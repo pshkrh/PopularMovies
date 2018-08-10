@@ -23,6 +23,13 @@
         <activity android:name=".FavouriteDetailsActivity" />
         <activity android:name=".FavouritesActivity"
             android:parentActivityName=".MainActivity"/>
+    
+    <provider
+        android:authorities="com.pshkrh.popularmovies"
+        android:name="com.pshkrh.popularmovies.FavouriteContentProvider"
+        android:exported="false"/>
+    
+    
     </application>
 
 </manifest>
