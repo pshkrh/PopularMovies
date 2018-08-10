@@ -98,4 +98,6 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
             return mFavourites.size();
     }
 
+
+
 }

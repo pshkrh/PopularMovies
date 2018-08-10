@@ -4,7 +4,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,10 +18,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.support.v4.content.AsyncTaskLoader;
 
 import java.util.ArrayList;
 
-public class FavouritesActivity extends AppCompatActivity {
+public class FavouritesActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     public static String TAG = "MainActivity";
 
@@ -25,11 +32,9 @@ public class FavouritesActivity extends AppCompatActivity {
 
     private final static String RECYCLER_STATE_KEY = "state";
     private final static String FAVOURITES_KEY = "favouritesKey";
+    public static final int LOADER_ID = 0;
 
     private Parcelable mRecyclerState;
-
-    private SQLiteDatabase mDb;
-    public DBHelper dbHelper = new DBHelper(this);
 
     private RecyclerView recyclerView;
 
@@ -43,16 +48,19 @@ public class FavouritesActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Favourite Movies");
         }
 
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
         ProgressBar progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.INVISIBLE);
 
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new GridLayoutManager(FavouritesActivity.this,noOfColumns));
-        mDb = dbHelper.getWritableDatabase();
+        FavouritesAdapter favouritesAdapter = new FavouritesAdapter(mFavourites,this);
+        recyclerView.setAdapter(favouritesAdapter);
 
         if(savedInstanceState != null && savedInstanceState.containsKey(FAVOURITES_KEY)){
             mFavourites = savedInstanceState.getParcelableArrayList(FAVOURITES_KEY);
-            FavouritesAdapter favouritesAdapter = new FavouritesAdapter(mFavourites,this);
+            favouritesAdapter = new FavouritesAdapter(mFavourites,this);
             recyclerView.setAdapter(favouritesAdapter);
             favouritesAdapter.notifyDataSetChanged();
             progressBar.setVisibility(View.INVISIBLE);
@@ -63,9 +71,8 @@ public class FavouritesActivity extends AppCompatActivity {
     }
 
     private void getFavouriteMovies(){
-        String query = "SELECT * FROM " + DBContract.DBEntry.TABLE_NAME;
-        Log.d(TAG,query);
-        Cursor mCursor = mDb.rawQuery(query,null);
+        Uri uri = DBContract.DBEntry.CONTENT_URI;
+        Cursor mCursor = getContentResolver().query(uri,null,null,null,null);
         mCursor.moveToFirst();
         do{
             String name = mCursor.getString(1);
@@ -114,6 +121,8 @@ public class FavouritesActivity extends AppCompatActivity {
         if(mRecyclerState!=null){
             recyclerView.getLayoutManager().onRestoreInstanceState(mRecyclerState);
         }
+
+        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -130,5 +139,49 @@ public class FavouritesActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        return new AsyncTaskLoader<Cursor>(this) {
+
+            Cursor mFavouritesData = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mFavouritesData != null) {
+                    deliverResult(mFavouritesData);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try{
+                    return getContentResolver().query(DBContract.DBEntry.CONTENT_URI,
+                            null,null,null,null);
+                } catch(Exception e){
+                    Log.e(TAG,"Failed to asynchronously load data.");
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            public void deliverResult(Cursor data) {
+                mFavouritesData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
     }
 }

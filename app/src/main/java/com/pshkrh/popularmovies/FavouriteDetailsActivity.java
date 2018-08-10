@@ -10,7 +10,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,7 +41,8 @@ import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
-public class FavouriteDetailsActivity extends AppCompatActivity {
+public class FavouriteDetailsActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
     private final static String TAG = "FaveDetailsActivity";
     public Favourite mFavourite;
     private SQLiteDatabase mDb;
@@ -45,15 +52,18 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
     public ArrayList<Review> mReviews = new ArrayList<>();
 
     private int starred=1;
+    public static final int LOADER_ID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_favourite_details);
+        setContentView(R.layout.activity_movie_details);
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Movie Details");
         }
+
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
         DBHelper dbHelper = new DBHelper(this);
 
@@ -61,11 +71,11 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
 
         mFavourite = getIntent().getParcelableExtra("Parcel");
 
-        favouritePoster = findViewById(R.id.favourite_poster_2);
-        TextView title = findViewById(R.id.favourite_title);
-        TextView rating = findViewById(R.id.favourite_rating);
-        TextView releaseDate = findViewById(R.id.favourite_release_date);
-        TextView overview = findViewById(R.id.favourite_overview);
+        favouritePoster = findViewById(R.id.movie_poster_2);
+        TextView title = findViewById(R.id.movie_title);
+        TextView rating = findViewById(R.id.movie_rating);
+        TextView releaseDate = findViewById(R.id.release_date);
+        TextView overview = findViewById(R.id.movie_overview);
 
         String favouriterate = mFavourite.getRating() + "/10";
         String favouriteID = mFavourite.getMovieID();
@@ -105,7 +115,7 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    RecyclerView recyclerView = findViewById(R.id.favourite_recycler_review);
+                    RecyclerView recyclerView = findViewById(R.id.recycler_review);
                     try{
                         JSONArray resultsLength = response.getJSONArray("results");
                         for(int i=0;i<resultsLength.length();i++){
@@ -156,7 +166,7 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    RecyclerView trailerRecyclerView = findViewById(R.id.favourite_recycler_trailer);
+                    RecyclerView trailerRecyclerView = findViewById(R.id.recycler_trailer);
                     try{
                         JSONArray resultsLength = response.getJSONArray("results");
                         for(int i=0;i<resultsLength.length();i++){
@@ -260,33 +270,65 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
         cv.put(DBContract.DBEntry.COLUMN_MOVIE_POSTER,poster);
 
         Log.d(TAG,cv.toString());
+        Uri uri = getContentResolver().insert(DBContract.DBEntry.CONTENT_URI,cv);
 
-        long result = mDb.insert(DBContract.DBEntry.TABLE_NAME, null,cv);
-
-        if(result == -1){
-            return false;
-        }
-        else return true;
-    }
-
-    public void removeFavourite(Favourite favourite){
-        //long res = mDb.delete(DBContract.DBEntry.TABLE_NAME, DBContract.DBEntry.COLUMN_MOVIE_ID +  "=" + movie.getMovieID(),null);
-        String query = "DELETE FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " + DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + favourite.getMovieID();
-        mDb.execSQL(query);
-    }
-
-    public boolean checkFavourite(Favourite favourite){
-        String query = "SELECT " + DBContract.DBEntry.COLUMN_MOVIE_ID + " FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " +
-                DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + favourite.getMovieID();
-        Log.d(TAG,query);
-        Cursor mCursor = mDb.rawQuery(query,null);
-        if(mCursor.getCount() == 1){
-            mCursor.close();
+        if(uri!=null){
             return true;
         }
         else{
-            mCursor.close();
             return false;
         }
     }
+
+    public void removeFavourite(Favourite favourite){
+        Uri uri = DBContract.DBEntry.CONTENT_URI;
+        uri = uri.buildUpon().appendPath(favourite.getMovieID()).build();
+        getContentResolver().delete(uri, favourite.getMovieID(), null);
+        getSupportLoaderManager().restartLoader(LOADER_ID, null,FavouriteDetailsActivity.this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        return new AsyncTaskLoader<Cursor>(this) {
+
+            Cursor mFavouritesData = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mFavouritesData != null) {
+                    deliverResult(mFavouritesData);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try{
+                    return getContentResolver().query(DBContract.DBEntry.CONTENT_URI,
+                            null,null,null,null);
+                } catch(Exception e){
+                    Log.e(TAG,"Failed to asynchronously load data.");
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            public void deliverResult(Cursor data) {
+                mFavouritesData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
+
 }
