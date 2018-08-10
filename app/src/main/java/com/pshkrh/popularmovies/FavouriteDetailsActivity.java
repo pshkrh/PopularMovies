@@ -91,7 +91,6 @@ public class FavouriteDetailsActivity extends AppCompatActivity {
     }
 
     public void loadReviews(String movieID){
-        //final TextView reviews = findViewById(R.id.movie_review);
         String reviewUrl = "http://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=" + BuildConfig.API_KEY;
 
         ConnectivityManager cm =
