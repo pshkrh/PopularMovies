@@ -20,10 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MovieDetailsActivity" />
-        <activity android:name=".FavouritesActivity"
-            android:parentActivityName=".MainActivity"/>
-    
-    <provider
+
+        <provider
         android:authorities="com.pshkrh.popularmovies"
         android:name="com.pshkrh.popularmovies.FavouriteContentProvider"
         android:exported="false"/>
