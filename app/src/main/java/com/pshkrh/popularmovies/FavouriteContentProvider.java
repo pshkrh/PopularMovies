@@ -62,6 +62,18 @@ public class FavouriteContentProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+            case FAVOURITE_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                String mSelection = "id=?";
+                String[] mSelectionArgs = new String[]{id};
+                retCursor = db.query(DBContract.DBEntry.TABLE_NAME,
+                        projection,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
