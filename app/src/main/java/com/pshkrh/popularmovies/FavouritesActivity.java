@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.support.v4.content.AsyncTaskLoader;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -73,27 +74,33 @@ public class FavouritesActivity extends AppCompatActivity implements
     private void getFavouriteMovies(){
         Uri uri = DBContract.DBEntry.CONTENT_URI;
         Cursor mCursor = getContentResolver().query(uri,null,null,null,null);
-        mCursor.moveToFirst();
-        do{
-            String name = mCursor.getString(1);
-            String rating = mCursor.getString(2);
-            String overview = mCursor.getString(3);
-            String date = mCursor.getString(4);
-            byte[] byteArray = mCursor.getBlob(5);
-            Bitmap bm = BitmapFactory.decodeByteArray(byteArray, 0 ,byteArray.length);
-            String id = mCursor.getString(6);
+        if(mCursor!=null && mCursor.getCount() > 0){
+            mCursor.moveToFirst();
+            do{
+                String name = mCursor.getString(1);
+                String rating = mCursor.getString(2);
+                String overview = mCursor.getString(3);
+                String date = mCursor.getString(4);
+                byte[] byteArray = mCursor.getBlob(5);
+                Bitmap bm = BitmapFactory.decodeByteArray(byteArray, 0 ,byteArray.length);
+                String id = mCursor.getString(6);
 
-            String check = name + "///" + rating + "///" + id;
-            Log.d(TAG,check);
-            Favourite favourite = new Favourite(name,overview,rating,date,id,bm);
-            mFavourites.add(favourite);
-        } while(mCursor.moveToNext());
-        mCursor.close();
-        RecyclerView recyclerView = findViewById(R.id.recycler);
-        FavouritesAdapter favouritesAdapter = new FavouritesAdapter(mFavourites,this);
-        recyclerView.setAdapter(favouritesAdapter);
-        favouritesAdapter.notifyDataSetChanged();
-        recyclerView.setLayoutManager(new GridLayoutManager(FavouritesActivity.this,noOfColumns));
+                String check = name + "///" + rating + "///" + id;
+                Log.d(TAG,check);
+                Favourite favourite = new Favourite(name,overview,rating,date,id,bm);
+                mFavourites.add(favourite);
+            } while(mCursor.moveToNext());
+            mCursor.close();
+            RecyclerView recyclerView = findViewById(R.id.recycler);
+            FavouritesAdapter favouritesAdapter = new FavouritesAdapter(mFavourites,this);
+            recyclerView.setAdapter(favouritesAdapter);
+            favouritesAdapter.notifyDataSetChanged();
+            recyclerView.setLayoutManager(new GridLayoutManager(FavouritesActivity.this,noOfColumns));
+        }
+        else{
+            Toast.makeText(this, "No Favourite Movies Yet!", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
