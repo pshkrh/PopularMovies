@@ -260,18 +260,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         Log.d(TAG,cv.toString());
 
-        long result = mDb.insert(DBContract.DBEntry.TABLE_NAME, null,cv);
+        Uri uri = getContentResolver().insert(DBContract.DBEntry.CONTENT_URI,cv);
 
-        if(result == -1){
+        if(uri!=null){
+            return true;
+        }
+        else{
             return false;
         }
-        else return true;
     }
 
     public void removeFavourite(Movie movie){
-        //long res = mDb.delete(DBContract.DBEntry.TABLE_NAME, DBContract.DBEntry.COLUMN_MOVIE_ID +  "=" + movie.getMovieID(),null);
-        String query = "DELETE FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " + DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + movie.getMovieID();
-        mDb.execSQL(query);
+        Uri uri = DBContract.DBEntry.CONTENT_URI;
+        uri = uri.buildUpon().appendPath(movie.getMovieID()).build();
+        getContentResolver().delete(uri, movie.getMovieID(), null);
     }
 
     public boolean checkFavourite(Movie movie){
