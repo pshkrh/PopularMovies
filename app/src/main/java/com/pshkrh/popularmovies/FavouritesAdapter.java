@@ -48,9 +48,9 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
         public void onClick(View view) {
             int position = getAdapterPosition();
             Favourite passDetails = mFavourites.get(position);
-            Intent intent = new Intent(view.getContext(),FavouriteDetailsActivity.class);
+            Intent intent = new Intent(view.getContext(),MovieDetailsActivity.class);
             intent.putExtra("Parcel",passDetails);
-
+            intent.putExtra("Flag","fav");
             Bitmap bm = passDetails.getBitmap();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bm.compress(Bitmap.CompressFormat.PNG,50,bos);
