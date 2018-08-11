@@ -44,13 +44,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private final static String TAG = "MovieDetailsActivity";
     public Movie movie;
+    public Favourite mFavourite;
     public ArrayList<Trailer> mTrailers = new ArrayList<>();
     public ArrayList<Review> mReviews = new ArrayList<>();
 
     private int starred=0;
-    private SQLiteDatabase mDb;
 
     public ImageView moviePoster;
+
+    private String flag="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,36 +63,60 @@ public class MovieDetailsActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Movie Details");
         }
 
-        DBHelper dbHelper = new DBHelper(this);
-
-        mDb = dbHelper.getWritableDatabase();
-
-        movie = getIntent().getParcelableExtra("Parcel");
-
-        if(checkFavourite(movie)){
-            starred=1;
-        }
-
+        //Finding Views
         moviePoster = findViewById(R.id.movie_poster_2);
         TextView title = findViewById(R.id.movie_title);
         TextView rating = findViewById(R.id.movie_rating);
         TextView releaseDate = findViewById(R.id.release_date);
         TextView overview = findViewById(R.id.movie_overview);
 
-        String movierate = movie.getRating() + "/10";
-        String movieID = movie.getMovieID();
-        title.setText(movie.getTitle());
-        rating.setText(movierate);
-        releaseDate.setText(movie.getDate());
-        String posterUrl = "http://image.tmdb.org/t/p/w185/" + movie.getPosterPath();
-        Glide.with(this).load(posterUrl).into(moviePoster);
-        overview.setText(movie.getOverview());
+        flag = getIntent().getStringExtra("Flag");
 
-        //Load Trailer List for the Movie
-        loadTrailersList(movieID);
+        if(flag.equals("mov")){
+            movie = getIntent().getParcelableExtra("Parcel");
+            if(checkFavourite(movie)){
+                starred=1;
+            }
+            String movierate = movie.getRating() + "/10";
+            String movieID = movie.getMovieID();
+            title.setText(movie.getTitle());
+            rating.setText(movierate);
+            releaseDate.setText(movie.getDate());
+            String posterUrl = "http://image.tmdb.org/t/p/w185/" + movie.getPosterPath();
+            Glide.with(this).load(posterUrl).into(moviePoster);
+            overview.setText(movie.getOverview());
 
-        // Load Reviews for the Movie
-        loadReviews(movieID);
+            //Load Trailer List for the Movie
+            loadTrailersList(movieID);
+
+            // Load Reviews for the Movie
+            loadReviews(movieID);
+        }
+        else if(flag.equals("fav")){
+            mFavourite = getIntent().getParcelableExtra("Parcel");
+            starred=1;
+
+            String favouriterate = mFavourite.getRating() + "/10";
+            String favouriteID = mFavourite.getMovieID();
+            String synopsis = mFavourite.getOverview();
+            title.setText(mFavourite.getTitle());
+            rating.setText(favouriterate);
+            releaseDate.setText(mFavourite.getDate());
+            overview.setText(synopsis);
+
+            if(getIntent().hasExtra("byteArray")) {
+                Bitmap bm = BitmapFactory.decodeByteArray(
+                        getIntent().getByteArrayExtra("byteArray"),0,getIntent().getByteArrayExtra("byteArray").length);
+                moviePoster.setImageBitmap(bm);
+            }
+
+
+            //Load Trailer List for the Favourite Movie
+            loadTrailersList(favouriteID);
+
+            // Load Reviews for the Favourite Movie
+            loadReviews(favouriteID);
+        }
 
     }
 
@@ -213,7 +239,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 if(starred==0) {
                     starred = 1;
                     item.setIcon(R.drawable.star);
-                    boolean res = setFavourite(movie);
+                    boolean res = setFavourite();
                     if(res)
                         Toast.makeText(this, "Set Favourite Movie Successfully!", Toast.LENGTH_SHORT).show();
                     break;
@@ -221,7 +247,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 else {
                     starred = 0;
                     item.setIcon(R.drawable.star_outline);
-                    removeFavourite(movie);
+                    removeFavourite();
                     Toast.makeText(this, "Unfavourited Movie Successfully!", Toast.LENGTH_SHORT).show();
                     break;
                 }
@@ -242,7 +268,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean setFavourite(Movie movie){
+    public boolean setFavourite(){
         ContentValues cv = new ContentValues();
 
         cv.put(DBContract.DBEntry.COLUMN_MOVIE_NAME,movie.getTitle());
@@ -270,17 +296,24 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
     }
 
-    public void removeFavourite(Movie movie){
+    public void removeFavourite(){
         Uri uri = DBContract.DBEntry.CONTENT_URI;
-        uri = uri.buildUpon().appendPath(movie.getMovieID()).build();
-        getContentResolver().delete(uri, movie.getMovieID(), null);
+        if(flag.equals("mov")){
+            uri = uri.buildUpon().appendPath(movie.getMovieID()).build();
+            getContentResolver().delete(uri, movie.getMovieID(), null);
+        }
+        else if(flag.equals("fav")){
+            uri = uri.buildUpon().appendPath(mFavourite.getMovieID()).build();
+            getContentResolver().delete(uri, mFavourite.getMovieID(), null);
+        }
+
     }
 
     public boolean checkFavourite(Movie movie){
-        String query = "SELECT " + DBContract.DBEntry.COLUMN_MOVIE_ID + " FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " +
-                DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + movie.getMovieID();
-        Log.d(TAG,query);
-        Cursor mCursor = mDb.rawQuery(query,null);
+        Uri uri = DBContract.DBEntry.CONTENT_URI;
+        uri = uri.buildUpon().appendPath(movie.getMovieID()).build();
+        String[] mSelectionArgs = new String[]{movie.getMovieID()};
+        Cursor mCursor = getContentResolver().query(uri,null, DBContract.DBEntry.COLUMN_MOVIE_ID + "=?",mSelectionArgs,null);
         if(mCursor.getCount() == 1){
             mCursor.close();
             return true;
