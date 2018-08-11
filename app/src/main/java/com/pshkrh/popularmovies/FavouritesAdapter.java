@@ -58,7 +58,6 @@ public class FavouritesAdapter extends RecyclerView.Adapter<FavouritesAdapter.Vi
             intent.putExtra("byteArray",bos.toByteArray());
 
             view.getContext().startActivity(intent);
-            ((FavouritesActivity)mContext).finish();
         }
     }
 
